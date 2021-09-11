@@ -11,3 +11,6 @@ This application does not process payment. It will link into your payment proces
 2. Edit the catalog of items. Find `catalog_data` in the script.js file and change the values based on your foodbank inventory.
 3. Replace FOODBANK NAME in index.html with your foodbank name. Remove the 501c3 line from index.html if needed.
 4. Replace the foodbank links with your website url.
+5. Edit the images for your needs.
+
+The provided images are all part of the public domain.
