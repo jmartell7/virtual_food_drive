@@ -19,7 +19,7 @@
 })
 Vue.component('catalog-section', {
     props: ['section', 'name'],
-    template: '<div><div v-for="item in section"><catalog-item v-bind:item=item v-bind:section=name></catalog-item></div><div style="clear:both"></div></div>'
+    template: '<div v-show="section.shown"><div v-for="item in section.items"><catalog-item v-bind:item=item v-bind:section=name></catalog-item></div><div style="clear:both"></div></div>'
 })
 Vue.component('slideshow', {
     data: function () {
@@ -31,7 +31,7 @@ Vue.component('slideshow', {
 })
 Vue.component('catalog', {
     props: ['catalog_data'],
-    template: '<b-tabs><b-tab v-for="(section,name) in catalog_data.sections" :id=name v-bind:key=name><catalog-section v-bind:section=section v-bind:name=name></catalog-section></b-tab></b-tabs>'
+    template: '<b-tabs><b-tab v-for="(section,name) in catalog_data.sections" :id=name v-bind:key=name v-if="section.shown"><catalog-section v-bind:section=section v-bind:name=name></catalog-section></b-tab></b-tabs>'
 })		
 Vue.component('cart-section', {
     props: ['name', 'section'],
@@ -52,7 +52,7 @@ Vue.component('cart', {
     props: ['contents'],
     computed: {
 	    checkoutUrl: function () {
-			return "https://XXXX.salsalabs.org/virtualfooddrive/index.html?amount="+encodeURIComponent(this.total);
+			return "https://XXXX.salsalabs.org/virtualfooddrive/index.html?amount="+encodeURIComponent(this.total)+"&scf_message="+encodeURIComponent(this.message);
 		},
         total: function () {
             t = 0
@@ -62,7 +62,20 @@ Vue.component('cart', {
                 })
             })
             return t.toFixed(2);
-        }
+        },
+		message: function () {
+			m = new Set()
+            Object.values(this.contents).forEach(section => {
+                section.forEach(item => {
+					if (item.message) {
+					   m.add(item.message)
+					}
+                })
+            })
+			if (m.size) {
+				return Array.from(m).join("\n")			
+			}
+		}
     },
     methods: {
         clearCart() {
@@ -74,236 +87,253 @@ Vue.component('cart', {
 
 var app = new Vue({
     el: '#app',
-    data: {
+    data: function () {
+		showGiving = 1 > 2;
+		data = {
         catalog_data: {
 		    "sections": {
-		      "breakfast": [
-		        {
-		          "name": "Corn flakes",
-		          "case_price": "15.57",
-		          "size": "18 oz box",
-		          "unit_price": "1.29",
-		          "units_per_case": "12",
-		          "image": "img/food/cornflakes.png",
-				  "inCart": false
-		        },
-		        {
-		          "name": "Shelf stable milk",
-		          "case_price": "10.75",
-		          "size": "8 oz ",
-		          "unit_price": "0.40",
-		          "units_per_case": "27",
-		          "image": "img/food/milk.png",
-				  "inCart": false			
-		        },
-		        {
-		          "name": "Peanut butter ",
-		          "case_price": "20.45",
-		          "size": "18 oz box",
-		          "unit_price": "1.70",
-		          "units_per_case": "12",
-		          "image": "img/food/peanutbutter.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Jelly",
-		          "case_price": "13.25",
-		          "size": "19 oz",
-		          "unit_price": "1.10",
-		          "units_per_case": "12",
-		          "image": "img/food/jelly.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Applesauce",
-		          "case_price": "16.4",
-		          "size": "14 oz",
-		          "unit_price": "0.68",
-		          "units_per_case": "24",
-		          "image": "img/food/applesauce.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Peaches",
-		          "case_price": "17.85",
-		          "size": "14 oz",
-		          "unit_price": "0.74",
-		          "units_per_case": "24",
-		          "image": "img/food/peaches.png",
-				  "inCart": false							
-		        }
-		      ],
-		      "lunch": [
-		        {
-		          "name": "Carrots",
-		          "case_price": "29.76",
-		          "size": "5 oz",
-		          "unit_price": "0.62",
-		          "units_per_case": "48",
-		          "image": "img/food/carrot.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Corn",
-		          "case_price": "15.76",
-		          "size": "15 oz",
-		          "unit_price": "0.66",
-		          "units_per_case": "24",
-		          "image": "img/food/corn.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Peaches",
-		          "case_price": "17.85",
-		          "size": "14 oz",
-		          "unit_price": "0.74",
-		          "units_per_case": "24",
-		          "image": "img/food/peaches.png",
-				  "inCart": false						
-		        },
-		        {
-		          "name": "Jelly",
-		          "case_price": "13.25",
-		          "size": "19 oz",
-		          "unit_price": "1.10",
-		          "units_per_case": "12",
-		          "image": "img/food/jelly.png",
-				  "inCart": false						
-		        },
-		        {
-		          "name": "Baked beans",
-		          "case_price": "13.4",
-		          "size": "16 oz",
-		          "unit_price": "0.56",
-		          "units_per_case": "24",
-		          "image": "img/food/bakedbeans.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Applesauce",
-		          "case_price": "16.4",
-		          "size": "14 oz",
-		          "unit_price": "0.68",
-		          "units_per_case": "24",
-		          "image": "img/food/applesauce.png",
-				  "inCart": false							
-		        }
-		      ],
-		      "dinner": [
-		        {
-		          "name": "Corn",
-		          "case_price": "15.76",
-		          "size": "15 oz",
-		          "unit_price": "0.66",
-		          "units_per_case": "24",
-		          "image": "img/food/corn.png",
-				  "inCart": false								
-		        },
-		        {
-		          "name": "Baked beans",
-		          "case_price": "13.4",
-		          "size": "16 oz",
-		          "unit_price": "0.56",
-		          "units_per_case": "24",
-		          "image": "img/food/bakedbeans.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Applesauce",
-		          "case_price": "16.4",
-		          "size": "14 oz",
-		          "unit_price": "0.68",
-		          "units_per_case": "24",
-		          "image": "img/food/applesauce.png",
-				  "inCart": false								
-		        },
-		        {
-		          "name": "Canned ham",
-		          "case_price": "22",
-		          "size": "16 oz",
-		          "unit_price": "2.75",
-		          "units_per_case": "8",
-		          "image": "img/food/ham.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Ketchup",
-		          "case_price": "6.35",
-		          "size": "15 oz",
-		          "unit_price": "0.53",
-		          "units_per_case": "12",
-		          "image": "img/food/ketchup.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Spaghetti noodles",
-		          "case_price": "8.56",
-		          "size": "1 lb",
-		          "unit_price": "0.43",
-		          "units_per_case": "20",
-		          "image": "img/food/spaghetti.png",
-				  "inCart": false							
-		        }
-		      ],
-		      "specialty": [
-		        {
-		          "name": "Spaghetti noodles",
-		          "case_price": "8.56",
-		          "size": "1 lb",
-		          "unit_price": "0.43",
-		          "units_per_case": "20",
-		          "image": "img/food/spaghetti.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Gas",
-		          "case_price": "500",
-		          "size": "",
-		          "unit_price": "500",
-		          "units_per_case": "125 gallons of gas",
-		          "image": "img/food/gas.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Ketchup",
-		          "case_price": "6.35",
-		          "size": "15 oz",
-		          "unit_price": "0.53",
-		          "units_per_case": "12",
-		          "image": "img/food/ketchup.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Feed a family of 4 for 1 week",
-		          "case_price": "17",
-		          "size": "",
-		          "unit_price": "17",
-		          "units_per_case": "32",
-		          "image": "img/food/oneweek.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Feed a family of 4 for a month",
-		          "case_price": "72",
-		          "size": "",
-		          "unit_price": "72",
-		          "units_per_case": "72",
-		          "image": "img/food/onemonth.png",
-				  "inCart": false							
-		        },
-		        {
-		          "name": "Feed a family of 4 for 1 year",
-		          "case_price": "3000",
-		          "size": "",
-		          "unit_price": "876",
-		          "units_per_case": "",
-		          "image": "img/food/oneyear.png",
-				  "inCart": false							
-		        }]
+  		      "breakfast": {
+  				  "items":[
+  			        {
+  			          "name": "Corn flakes",
+  			          "case_price": "15.57",
+  			          "size": "18 oz box",
+  			          "unit_price": "1.29",
+  			          "units_per_case": "12",
+  			          "image": "img/food/cornflakes.png",
+  					  "inCart": false,
+  			        },
+  			        {
+  			          "name": "Shelf stable milk",
+  			          "case_price": "10.75",
+  			          "size": "8 oz ",
+  			          "unit_price": "0.40",
+  			          "units_per_case": "27",
+  			          "image": "img/food/milk.png",
+  					  "inCart": false			
+  			        },
+  			        {
+  			          "name": "Peanut butter ",
+  			          "case_price": "20.45",
+  			          "size": "18 oz box",
+  			          "unit_price": "1.70",
+  			          "units_per_case": "12",
+  			          "image": "img/food/peanutbutter.png",
+  					  "inCart": false							
+  			        },
+  			        {
+  			          "name": "Jelly",
+  			          "case_price": "13.25",
+  			          "size": "19 oz",
+  			          "unit_price": "1.10",
+  			          "units_per_case": "12",
+  			          "image": "img/food/jelly.png",
+  					  "inCart": false							
+  			        },
+  			        {
+  			          "name": "Applesauce",
+  			          "case_price": "16.4",
+  			          "size": "14 oz",
+  			          "unit_price": "0.68",
+  			          "units_per_case": "24",
+  			          "image": "img/food/applesauce.png",
+  					  "inCart": false							
+  			        },
+  			        {
+  			          "name": "Peaches",
+  			          "case_price": "17.85",
+  			          "size": "14 oz",
+  			          "unit_price": "0.74",
+  			          "units_per_case": "24",
+  			          "image": "img/food/peaches.png",
+  					  "inCart": false							
+  			        }
+  			      ],
+				  "shown": showGiving
+  			  },
+  		      "lunch": {
+  				  "items":[
+					{
+	  		          "name": "Carrots",
+	  		          "case_price": "29.76",
+	  		          "size": "5 oz",
+	  		          "unit_price": "0.62",
+	  		          "units_per_case": "48",
+	  		          "image": "img/food/carrot.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Corn",
+	  		          "case_price": "15.76",
+	  		          "size": "15 oz",
+	  		          "unit_price": "0.66",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/corn.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Peaches",
+	  		          "case_price": "17.85",
+	  		          "size": "14 oz",
+	  		          "unit_price": "0.74",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/peaches.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Jelly",
+	  		          "case_price": "13.25",
+	  		          "size": "19 oz",
+	  		          "unit_price": "1.10",
+	  		          "units_per_case": "12",
+	  		          "image": "img/food/jelly.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Baked beans",
+	  		          "case_price": "13.4",
+	  		          "size": "16 oz",
+	  		          "unit_price": "0.56",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/bakedbeans.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Applesauce",
+	  		          "case_price": "16.4",
+	  		          "size": "14 oz",
+	  		          "unit_price": "0.68",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/applesauce.png",
+	  		          "inCart": false,
+	  		        }
+  			      ],
+				  "shown": true,
+  			  },
+  		      "dinner": {
+  				  "items":[
+	  		        {
+	  		          "name": "Corn",
+	  		          "case_price": "15.76",
+	  		          "size": "15 oz",
+	  		          "unit_price": "0.66",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/corn.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Baked beans",
+	  		          "case_price": "13.4",
+	  		          "size": "16 oz",
+	  		          "unit_price": "0.56",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/bakedbeans.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Applesauce",
+	  		          "case_price": "16.4",
+	  		          "size": "14 oz",
+	  		          "unit_price": "0.68",
+	  		          "units_per_case": "24",
+	  		          "image": "img/food/applesauce.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Canned ham",
+	  		          "case_price": "22",
+	  		          "size": "16 oz",
+	  		          "unit_price": "2.75",
+	  		          "units_per_case": "8",
+	  		          "image": "img/food/ham.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Ketchup",
+	  		          "case_price": "6.35",
+	  		          "size": "15 oz",
+	  		          "unit_price": "0.53",
+	  		          "units_per_case": "12",
+	  		          "image": "img/food/ketchup.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Spaghetti noodles",
+	  		          "case_price": "8.56",
+	  		          "size": "1 lb",
+	  		          "unit_price": "0.43",
+	  		          "units_per_case": "20",
+	  		          "image": "img/food/spaghetti.png",
+	  		          "inCart": false,
+	  		        }
+  			      ],
+				  "shown": true,
+  			  },
+  		      "specialty": {
+  				  "items":[
+	  		        {
+	  		          "name": "Spaghetti noodles",
+	  		          "case_price": "8.56",
+	  		          "size": "1 lb",
+	  		          "unit_price": "0.43",
+	  		          "units_per_case": "20",
+	  		          "image": "img/food/spaghetti.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Gas",
+	  		          "case_price": "500",
+	  		          "size": "",
+	  		          "unit_price": "500",
+	  		          "units_per_case": "125 gallons of gas",
+	  		          "image": "img/food/gas.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Ketchup",
+	  		          "case_price": "6.35",
+	  		          "size": "15 oz",
+	  		          "unit_price": "0.53",
+	  		          "units_per_case": "12",
+	  		          "image": "img/food/ketchup.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Feed a family of 4 for 1 week",
+	  		          "case_price": "17",
+	  		          "size": "",
+	  		          "unit_price": "17",
+	  		          "units_per_case": "32",
+	  		          "image": "img/food/oneweek.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Feed a family of 4 for a month",
+	  		          "case_price": "72",
+	  		          "size": "",
+	  		          "unit_price": "72",
+	  		          "units_per_case": "72",
+	  		          "image": "img/food/onemonth.png",
+	  		          "inCart": false,
+	  		        },
+	  		        {
+	  		          "name": "Feed a family of 4 for 1 year",
+	  		          "case_price": "3000",
+	  		          "size": "",
+	  		          "unit_price": "876",
+	  		          "units_per_case": "",
+	  		          "image": "img/food/oneyear.png",
+	  		          "inCart": false,
+  			        }
+  			      ],
+				  "shown": true,
+  			  },	
 			}
         },
-        contents: {}
-        },
+        contents: {},
+        }
+		return data;
+	},
     methods: {
 		decrementItem(section, item){
             if (!(section in this.contents)) {
@@ -365,6 +395,6 @@ var app = new Vue({
 				delete this.contents[section];
 			}
 		}
-    }
+    },
 })
 let cart = [];
